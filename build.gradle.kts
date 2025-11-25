@@ -7,13 +7,11 @@ buildscript {
     repositories {
         google()
         mavenCentral()
-        // Shitpack repo which contains our tools and dependencies
         maven("https://jitpack.io")
     }
 
     dependencies {
         classpath("com.android.tools.build:gradle:8.7.3")
-        // Cloudstream gradle plugin which makes everything work and builds plugins
         classpath("com.github.recloudstream:gradle:-SNAPSHOT")
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:2.1.0")
     }
@@ -37,7 +35,6 @@ subprojects {
     apply(plugin = "com.lagradost.cloudstream3.gradle")
 
     cloudstream {
-        // when running through github workflow, GITHUB_REPOSITORY should contain current repository name
         setRepo(System.getenv("GITHUB_REPOSITORY") ?: "user/repo")
     }
 
@@ -57,7 +54,7 @@ subprojects {
 
         tasks.withType<KotlinJvmCompile> {
             compilerOptions {
-                jvmTarget.set(JvmTarget.JVM_1_8) // Required
+                jvmTarget.set(JvmTarget.JVM_1_8)
                 freeCompilerArgs.addAll(
                     "-Xno-call-assertions",
                     "-Xno-param-assertions",
@@ -71,30 +68,17 @@ subprojects {
         val cloudstream by configurations
         val implementation by configurations
 
-        // Stubs for all cloudstream classes
         cloudstream("com.lagradost:cloudstream3:pre-release")
 
-        // These dependencies can include any of those which are added by the app,
-        // but you don't need to include any of them if you don't need them.
-        // https://github.com/recloudstream/cloudstream/blob/master/app/build.gradle.kts
-        implementation(kotlin("stdlib")) // Adds Standard Kotlin Features
-        implementation("com.github.Blatzar:NiceHttp:0.4.13") // HTTP Lib - UPDATED
-        implementation("org.jsoup:jsoup:1.21.2") // HTML Parser - UPDATED
-        // IMPORTANT: Do not bump Jackson above 2.13.1, as newer versions will
-        // break compatibility on older Android devices.
-        implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.13.1") // JSON Parser
-        implementation("com.fasterxml.jackson.core:jackson-databind:2.13.1") // ADDED for better JSON handling
-        
-        // SIMKL Integration Dependencies
-        implementation("com.squareup.okhttp3:okhttp:4.12.0") // For API calls
-        implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3") // For async operations
-        
-        // Additional utilities used by Phisher's providers
-        implementation("com.google.code.gson:gson:2.10.1") // For JSON parsing
-        implementation("org.mozilla:rhino:1.7.14") // For JavaScript execution
-        implementation("me.xdrop:fuzzywuzzy:1.4.0") // For fuzzy string matching
-        
-        // Your existing material dependencies (if needed for UI components)
+        implementation(kotlin("stdlib"))
+        implementation("com.github.Blatzar:NiceHttp:0.4.13")
+        implementation("org.jsoup:jsoup:1.21.2")
+        implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.13.1")
+        implementation("com.squareup.okhttp3:okhttp:4.12.0")
+        implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
+        implementation("com.google.code.gson:gson:2.10.1")
+        implementation("org.mozilla:rhino:1.7.14")
+        implementation("me.xdrop:fuzzywuzzy:1.4.0")
         implementation("com.google.android.material:material:1.9.0")
         implementation("androidx.browser:browser:1.5.0")
     }
