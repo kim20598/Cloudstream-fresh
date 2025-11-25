@@ -11,6 +11,8 @@ import com.lagradost.cloudstream3.utils.newExtractorLink
 import com.lagradost.cloudstream3.utils.getQualityFromName
 import org.jsoup.nodes.Element
 import kotlin.Pair
+import com.kim20598.utils.SIMKLUtils
+import com.kim20598.utils.SIMKLMetadata
 
 class Akwam : MainAPI() {
     data class PosterData(val posterUrl: String?)
@@ -179,6 +181,15 @@ class Akwam : MainAPI() {
         val directEpisodes = mainDoc.select("div#series-episodes div[class*='col-']")
         val isSeries = seasonsMap.size > 1 || directEpisodes.isNotEmpty()
 
+        // SIMKL Integration - Extract IMDB ID and enhance metadata
+        val imdbId = extractImdbId(mainDoc)
+        val simklData = SIMKLMetadata.enhanceWithSIMKL(
+            title = title,
+            year = year,
+            imdbId = imdbId,
+            type = if (isSeries) "tv" else "movie"
+        )
+
         if (!isSeries) {
             return newMovieLoadResponse(name = title, url = pageUrl, type = TvType.Movie, dataUrl = pageUrl) {
                 this.posterUrl = poster
@@ -187,6 +198,13 @@ class Akwam : MainAPI() {
                 this.year = year
                 this.tags = tags
                 this.recommendations = recommendations
+                // Apply SIMKL metadata enhancement
+                SIMKLMetadata.applySIMKLToLoadResponse(simklData) {
+                    this.posterUrl = this@newMovieLoadResponse.posterUrl ?: poster
+                    this.plot = this@newMovieLoadResponse.plot ?: plot
+                    this.year = this@newMovieLoadResponse.year ?: year
+                    this.tags = this@newMovieLoadResponse.tags ?: tags
+                }
             }
         }
 
@@ -225,6 +243,13 @@ class Akwam : MainAPI() {
                 this.year = year
                 this.tags = tags
                 this.recommendations = recommendations
+                // Apply SIMKL metadata enhancement
+                SIMKLMetadata.applySIMKLToLoadResponse(simklData) {
+                    this.posterUrl = this@newMovieLoadResponse.posterUrl ?: poster
+                    this.plot = this@newMovieLoadResponse.plot ?: plot
+                    this.year = this@newMovieLoadResponse.year ?: year
+                    this.tags = this@newMovieLoadResponse.tags ?: tags
+                }
             }
         }
 
@@ -237,7 +262,20 @@ class Akwam : MainAPI() {
             this.year = year
             this.tags = tags
             this.recommendations = recommendations
+            // Apply SIMKL metadata enhancement
+            SIMKLMetadata.applySIMKLToLoadResponse(simklData) {
+                this.posterUrl = this@newTvSeriesLoadResponse.posterUrl ?: poster
+                this.plot = this@newTvSeriesLoadResponse.plot ?: plot
+                this.year = this@newTvSeriesLoadResponse.year ?: year
+                this.tags = this@newTvSeriesLoadResponse.tags ?: tags
+            }
         }
+    }
+
+    // Enhanced IMDB ID extraction for SIMKL integration
+    private fun extractImdbId(doc: org.jsoup.nodes.Document): String? {
+        val content = doc.html()
+        return SIMKLUtils.extractIMDBIdFromUrl(content)
     }
 
     private fun getSeasonNumber(seasonName: String): Int {
