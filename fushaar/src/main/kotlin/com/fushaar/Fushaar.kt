@@ -6,6 +6,8 @@ import com.lagradost.cloudstream3.utils.ExtractorLink
 import com.lagradost.cloudstream3.utils.loadExtractor
 import org.jsoup.nodes.Element
 import java.net.URLEncoder
+import com.kim20598.utils.SIMKLUtils
+import com.kim20598.utils.SIMKLMetadata
 
 class Fushaar : MainAPI() {
     override var lang = "ar"
@@ -109,6 +111,15 @@ class Fushaar : MainAPI() {
         
         val youtubeTrailer = doc.selectFirst("iframe[src*='youtube'], iframe[src*='youtu.be']")?.attr("src") ?: ""
         
+        // SIMKL Integration - Extract IMDB ID and enhance metadata
+        val imdbId = extractImdbId(doc)
+        val simklData = SIMKLMetadata.enhanceWithSIMKL(
+            title = title,
+            year = year,
+            imdbId = imdbId,
+            type = "movie"
+        )
+        
         return newMovieLoadResponse(title, url, TvType.Movie, url) {
             this.posterUrl = posterUrl
             this.recommendations = recommendations
@@ -116,7 +127,20 @@ class Fushaar : MainAPI() {
             this.tags = tags
             this.year = year
             addTrailer(youtubeTrailer)
+            // Apply SIMKL metadata enhancement
+            SIMKLMetadata.applySIMKLToLoadResponse(simklData) {
+                this.posterUrl = this@newMovieLoadResponse.posterUrl ?: posterUrl
+                this.plot = this@newMovieLoadResponse.plot ?: synopsis
+                this.year = this@newMovieLoadResponse.year ?: year
+                this.tags = this@newMovieLoadResponse.tags ?: tags
+            }
         }
+    }
+
+    // Enhanced IMDB ID extraction for SIMKL integration
+    private fun extractImdbId(doc: org.jsoup.nodes.Document): String? {
+        val content = doc.html()
+        return SIMKLUtils.extractIMDBIdFromUrl(content)
     }
 
     override suspend fun loadLinks(
