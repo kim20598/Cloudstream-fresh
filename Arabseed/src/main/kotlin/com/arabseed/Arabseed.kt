@@ -4,12 +4,13 @@ import android.util.Log
 import com.lagradost.cloudstream3.*
 import com.lagradost.cloudstream3.utils.*
 import org.jsoup.Jsoup
-import com.lagradost.cloudstream3.network.CloudflareKiller
 import com.lagradost.cloudstream3.utils.Qualities
 import kotlinx.serialization.Serializable
 import com.lagradost.cloudstream3.MainAPI
 import com.lagradost.cloudstream3.TvType
 import com.lagradost.cloudstream3.utils.ExtractorLink
+import com.kim20598.utils.SIMKLUtils
+import com.kim20598.utils.SIMKLMetadata
 
 class Arabseed : MainAPI() {
 
@@ -154,17 +155,60 @@ class Arabseed : MainAPI() {
 
         val isTvSeries = episodes.isNotEmpty() || url.contains("/selary/")
 
+        // SIMKL Integration - Extract IMDB ID and enhance metadata
+        val imdbId = extractImdbId(doc)
+        val simklData = SIMKLMetadata.enhanceWithSIMKL(
+            title = title,
+            imdbId = imdbId,
+            type = if (isTvSeries) "tv" else "movie"
+        )
+
         return if (isTvSeries) {
             newTvSeriesLoadResponse(title, url, TvType.TvSeries, episodes.distinct().reversed()) {
                 this.posterUrl = poster
                 this.plot = synopsis
+                // Apply SIMKL metadata enhancement
+                SIMKLMetadata.applySIMKLToLoadResponse(simklData) {
+                    this.posterUrl = this@newTvSeriesLoadResponse.posterUrl ?: poster
+                    this.plot = this@newTvSeriesLoadResponse.plot ?: synopsis
+                }
             }
         } else {
             newMovieLoadResponse(title, url, TvType.Movie, url) {
                 this.posterUrl = poster
                 this.plot = synopsis
+                // Apply SIMKL metadata enhancement
+                SIMKLMetadata.applySIMKLToLoadResponse(simklData) {
+                    this.posterUrl = this@newMovieLoadResponse.posterUrl ?: poster
+                    this.plot = this@newMovieLoadResponse.plot ?: synopsis
+                }
             }
         }
+    }
+
+    // Enhanced IMDB ID extraction for SIMKL integration
+    private fun extractImdbId(doc: org.jsoup.nodes.Document): String? {
+        // Try multiple patterns to find IMDB ID
+        val content = doc.html()
+        
+        // Check meta tags
+        doc.select("meta[content]").forEach { meta ->
+            val content = meta.attr("content")
+            SIMKLUtils.extractIMDBIdFromUrl(content)?.let { return it }
+        }
+        
+        // Check text content
+        doc.body()?.text()?.let { bodyText ->
+            SIMKLUtils.extractIMDBIdFromUrl(bodyText)?.let { return it }
+        }
+        
+        // Check links
+        doc.select("a[href]").forEach { link ->
+            val href = link.attr("href")
+            SIMKLUtils.extractIMDBIdFromUrl(href)?.let { return it }
+        }
+        
+        return null
     }
 
     @Serializable
