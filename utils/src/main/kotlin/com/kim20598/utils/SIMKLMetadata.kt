@@ -1,7 +1,5 @@
 package com.kim20598.utils
 
-import com.lagradost.cloudstream3.*
-
 class SIMKLMetadata {
     companion object {
         suspend fun enhanceWithSIMKL(
@@ -25,42 +23,28 @@ class SIMKLMetadata {
             }
         }
         
-        fun applySIMKLToLoadResponse(
-            simklData: SIMKLUtils.SIMKLDetails?,
-            builder: LoadResponse.Builder.() -> Unit
-        ) {
-            simklData?.let { data ->
-                builder.apply {
-                    data.rating?.let { rating ->
-                        this.score = Score.from10(rating.toDouble())
-                    }
-                    data.overview?.let { overview ->
-                        if (this.plot.isNullOrEmpty()) {
-                            this.plot = overview
-                        }
-                    }
-                    data.genres?.let { genres ->
-                        if (this.tags.isNullOrEmpty()) {
-                            this.tags = genres
-                        }
-                    }
-                    data.runtime?.let { runtime ->
-                        if (this.duration == null) {
-                            this.duration = runtime
-                        }
-                    }
-                    data.poster?.let { poster ->
-                        if (this.posterUrl.isNullOrEmpty()) {
-                            this.posterUrl = "https://simkl.in/posters/${poster}_m.jpg"
-                        }
-                    }
-                    data.fanart?.let { fanart ->
-                        if (this.backgroundPosterUrl.isNullOrEmpty()) {
-                            this.backgroundPosterUrl = "https://simkl.in/fanart/${fanart}_mobile.jpg"
-                        }
-                    }
-                }
-            }
+        // Return SIMKL data for providers to use in their load methods
+        fun getSIMKLMetadata(
+            simklData: SIMKLUtils.SIMKLDetails?
+        ): SIMKLMetadataResult {
+            return SIMKLMetadataResult(
+                rating = simklData?.rating?.toDouble(),
+                overview = simklData?.overview,
+                genres = simklData?.genres,
+                runtime = simklData?.runtime,
+                posterUrl = simklData?.poster?.let { "https://simkl.in/posters/${it}_m.jpg" },
+                backgroundPosterUrl = simklData?.fanart?.let { "https://simkl.in/fanart/${it}_mobile.jpg" }
+            )
         }
     }
 }
+
+// Data class to hold SIMKL metadata results
+data class SIMKLMetadataResult(
+    val rating: Double? = null,
+    val overview: String? = null,
+    val genres: List<String>? = null,
+    val runtime: Int? = null,
+    val posterUrl: String? = null,
+    val backgroundPosterUrl: String? = null
+)
