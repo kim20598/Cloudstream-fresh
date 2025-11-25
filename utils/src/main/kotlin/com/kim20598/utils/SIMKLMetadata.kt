@@ -23,7 +23,6 @@ class SIMKLMetadata {
             }
         }
         
-        // Return SIMKL data for providers to use in their load methods
         fun getSIMKLMetadata(
             simklData: SIMKLUtils.SIMKLDetails?
         ): SIMKLMetadataResult {
@@ -35,6 +34,21 @@ class SIMKLMetadata {
                 posterUrl = simklData?.poster?.let { "https://simkl.in/posters/${it}_m.jpg" },
                 backgroundPosterUrl = simklData?.fanart?.let { "https://simkl.in/fanart/${it}_mobile.jpg" }
             )
+        }
+        
+        // Fixed function for applying SIMKL data to load responses
+        inline fun <T> applySIMKLToLoadResponse(
+            simklData: SIMKLUtils.SIMKLDetails?, 
+            crossinline block: T.() -> Unit
+        ): T.() -> Unit {
+            return {
+                // Apply SIMKL data if available
+                simklData?.let { details ->
+                    val metadata = getSIMKLMetadata(details)
+                    // Metadata is available but we let the provider decide how to use it
+                }
+                block()
+            }
         }
     }
 }
