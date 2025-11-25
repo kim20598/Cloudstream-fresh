@@ -12,11 +12,33 @@ buildscript {
     }
 
     dependencies {
-        classpath("com.android.tools.build:gradle:8.7.3")
-        // Cloudstream gradle plugin which makes everything work and builds plugins
-        classpath("com.github.recloudstream:gradle:-SNAPSHOT")
-        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:2.1.0")
-    }
+    val cloudstream by configurations
+    val implementation by configurations
+    
+    cloudstream("com.lagradost:cloudstream3:pre-release")
+    
+    // Existing dependencies
+    implementation(kotlin("stdlib"))
+    implementation("com.github.Blatzar:NiceHttp:0.4.13")
+    implementation("org.jsoup:jsoup:1.21.2")
+    implementation("androidx.annotation:annotation:1.9.1")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.20.1")
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.20.1")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.1")
+    implementation("org.mozilla:rhino:1.8.0")
+    implementation("me.xdrop:fuzzywuzzy:1.4.0")
+    implementation("com.google.code.gson:gson:2.13.2")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.9.0")
+    implementation("com.github.vidstige:jadb:v1.2.1")
+    implementation("org.bouncycastle:bcpkix-jdk15on:1.70")
+    
+    // SIMKL integration
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
+    
+    // Your existing material dependencies
+    implementation("com.google.android.material:material:1.13.0")
+    implementation("androidx.browser:browser:1.9.0")
+    implementation("androidx.room:room-ktx:2.8.0")
 }
 
 allprojects {
