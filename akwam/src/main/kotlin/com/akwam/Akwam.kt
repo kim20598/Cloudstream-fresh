@@ -10,7 +10,6 @@ import java.net.URLEncoder
 import com.lagradost.cloudstream3.utils.newExtractorLink
 import com.lagradost.cloudstream3.utils.getQualityFromName
 import org.jsoup.nodes.Element
-import kotlin.Pair
 import com.kim20598.utils.SIMKLUtils
 import com.kim20598.utils.SIMKLMetadata
 
@@ -37,7 +36,7 @@ class Akwam : MainAPI() {
             val pageUrl = if (page > 1) {
                 when {
                     base.endsWith("/page/") -> "$base$page/"
-                    base.contains("?") -> "$base&page=$page"
+                    base.contains("?") -> "$base&amp;page=$page"
                     else -> "$base?page=$page"
                 }
             } else base
@@ -66,27 +65,27 @@ class Akwam : MainAPI() {
             "$mainUrl/movies" to "أحدث الأفلام",
             "$mainUrl/series" to "أحدث المسلسلات",
             "$mainUrl/shows" to "العروض",
-            "$mainUrl/series?section=29&category=0&rating=0&year=0&language=0&formats=0&quality=0" to "مسلسلات عربي",
-            "$mainUrl/series?section=32&category=0&rating=0&year=0&language=0&formats=0&quality=0" to "مسلسلات تركي",
-            "$mainUrl/series?section=33&category=0&rating=0&year=0&language=0&formats=0&quality=0" to "مسلسلات اسيوية",
-            "$mainUrl/series?section=30&category=0&rating=0&year=0&language=0&formats=0&quality=0" to "مسلسلات اجنبي",
-            "$mainUrl/series?section=31&category=0&rating=0&year=0&language=0&formats=0&quality=0" to "مسلسلات هندي",
-            "$mainUrl/shows?section=46&category=0&rating=0&year=0&language=0&formats=0&quality=0" to "برامج وثائقيه",
-            "$mainUrl/shows?section=42&category=0&rating=0&year=0&language=0&formats=0&quality=0" to "برامج تلفزيونية",
-            "$mainUrl/shows?section=45&category=0&rating=0&year=0&language=0&formats=0&quality=0" to "مسرحيات",
-            "$mainUrl/movies?section=29&category=0&rating=0&year=0&language=0&formats=0&quality=0" to "أفلام عربي",
-            "$mainUrl/movies?section=32&category=0&rating=0&year=0&language=0&formats=0&quality=0" to "أفلام تركي",
-            "$mainUrl/movies?section=33&category=0&rating=0&year=0&language=0&formats=0&quality=0" to "أفلام اسيوية",
-            "$mainUrl/movies?section=30&category=0&rating=0&year=0&language=0&formats=0&quality=0" to "أفلام اجنبي",
-            "$mainUrl/movies?section=31&category=0&rating=0&year=0&language=0&formats=0&quality=0" to "أفلام هندي",
-            "$mainUrl/mix?section=36&category=0&rating=0&year=0&language=0&formats=0&quality=0" to "رياضة"
+            "$mainUrl/series?section=29&amp;category=0&amp;rating=0&amp;year=0&amp;language=0&amp;formats=0&amp;quality=0" to "مسلسلات عربي",
+            "$mainUrl/series?section=32&amp;category=0&amp;rating=0&amp;year=0&amp;language=0&amp;formats=0&amp;quality=0" to "مسلسلات تركي",
+            "$mainUrl/series?section=33&amp;category=0&amp;rating=0&amp;year=0&amp;language=0&amp;formats=0&amp;quality=0" to "مسلسلات اسيوية",
+            "$mainUrl/series?section=30&amp;category=0&amp;rating=0&amp;year=0&amp;language=0&amp;formats=0&amp;quality=0" to "مسلسلات اجنبي",
+            "$mainUrl/series?section=31&amp;category=0&amp;rating=0&amp;year=0&amp;language=0&amp;formats=0&amp;quality=0" to "مسلسلات هندي",
+            "$mainUrl/shows?section=46&amp;category=0&amp;rating=0&amp;year=0&amp;language=0&amp;formats=0&amp;quality=0" to "برامج وثائقيه",
+            "$mainUrl/shows?section=42&amp;category=0&amp;rating=0&amp;year=0&amp;language=0&amp;formats=0&amp;quality=0" to "برامج تلفزيونية",
+            "$mainUrl/shows?section=45&amp;category=0&amp;rating=0&amp;year=0&amp;language=0&amp;formats=0&amp;quality=0" to "مسرحيات",
+            "$mainUrl/movies?section=29&amp;category=0&amp;rating=0&amp;year=0&amp;language=0&amp;formats=0&amp;quality=0" to "أفلام عربي",
+            "$mainUrl/movies?section=32&amp;category=0&amp;rating=0&amp;year=0&amp;language=0&amp;formats=0&amp;quality=0" to "أفلام تركي",
+            "$mainUrl/movies?section=33&amp;category=0&amp;rating=0&amp;year=0&amp;language=0&amp;formats=0&amp;quality=0" to "أفلام اسيوية",
+            "$mainUrl/movies?section=30&amp;category=0&amp;rating=0&amp;year=0&amp;language=0&amp;formats=0&amp;quality=0" to "أفلام اجنبي",
+            "$mainUrl/movies?section=31&amp;category=0&amp;rating=0&amp;year=0&amp;language=0&amp;formats=0&amp;quality=0" to "أفلام هندي",
+            "$mainUrl/mix?section=36&amp;category=0&amp;rating=0&amp;year=0&amp;language=0&amp;formats=0&amp;quality=0" to "رياضة"
         )
 
         val items = ArrayList<HomePageList>()
         for ((baseUrl, titleName) in urls) {
             try {
                 val fullUrl = if (page > 1) {
-                    if (baseUrl.contains("?")) "$baseUrl&page=$page" else "$baseUrl?page=$page"
+                    if (baseUrl.contains("?")) "$baseUrl&amp;page=$page" else "$baseUrl?page=$page"
                 } else baseUrl
 
                 val doc = kotlin.runCatching { 
@@ -146,7 +145,6 @@ class Akwam : MainAPI() {
         val plot = mainDoc.selectFirst("h2:contains(قصة المسلسل) + div > p")?.text()?.trim()
             ?: mainDoc.selectFirst("meta[name=description]")?.attr("content")?.trim()
         
-        // Remove deprecated rating
         val tags = mainDoc.select("div.font-size-16.text-white a[href*='/genre/'], div.font-size-16.text-white a[href*='/category/']")
             .map { it.text() }
         val year = mainDoc.select("div.font-size-16.text-white a[href*='/year/']").firstOrNull()?.text()?.toIntOrNull()
