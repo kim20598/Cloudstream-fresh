@@ -14,7 +14,7 @@ repositories {
 }
 
 android {
-    namespace = "com.akwam"
+    namespace = "com.arabseed"
     compileSdk = 34
 
     defaultConfig {
@@ -45,7 +45,6 @@ dependencies {
     
     // JSON parsing
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.13.1")
-    implementation("com.fasterxml.jackson.core:jackson-databind:2.13.1")
     implementation("com.google.code.gson:gson:2.10.1")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
     
@@ -62,13 +61,15 @@ dependencies {
     // Android UI components
     implementation("com.google.android.material:material:1.13.0")
     implementation("androidx.browser:browser:1.9.0")
-    implementation("androidx.room:room-ktx:2.8.0")
     
     // Kotlin stdlib
     implementation(kotlin("stdlib"))
     
     // Android annotations
     implementation("androidx.annotation:annotation:1.9.1")
+    
+    // Utils module
+    implementation(project(":utils"))
 }
 
 cloudstream {
