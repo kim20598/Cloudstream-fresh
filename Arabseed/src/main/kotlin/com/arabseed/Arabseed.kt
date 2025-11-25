@@ -9,8 +9,9 @@ import kotlinx.serialization.Serializable
 import com.lagradost.cloudstream3.MainAPI
 import com.lagradost.cloudstream3.TvType
 import com.lagradost.cloudstream3.utils.ExtractorLink
-import com.kim20598.utils.SIMKLUtils
-import com.kim20598.utils.SIMKLMetadata
+import com.kim20598.utils.SIMKLUtils  // This should match your utils package
+import com.kim20598.utils.SIMKLMetadata  // This should match your utils package
+import com.kim20598.utils.SIMKLMetadataResult  // Add this import
 
 class Arabseed : MainAPI() {
 
@@ -302,3 +303,4 @@ class Arabseed : MainAPI() {
         return true
     }
 }
+
