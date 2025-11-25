@@ -9,9 +9,8 @@ import kotlinx.serialization.Serializable
 import com.lagradost.cloudstream3.MainAPI
 import com.lagradost.cloudstream3.TvType
 import com.lagradost.cloudstream3.utils.ExtractorLink
-import com.kim20598.utils.SIMKLUtils  // This should match your utils package
-import com.kim20598.utils.SIMKLMetadata  // This should match your utils package
-import com.kim20598.utils.SIMKLMetadataResult  // Add this import
+import com.kim20598.utils.SIMKLUtils
+import com.kim20598.utils.SIMKLMetadata
 
 class Arabseed : MainAPI() {
 
@@ -51,10 +50,8 @@ class Arabseed : MainAPI() {
 
     override val mainPage = mainPageOf(
         "$mainUrl/main0/" to "الرئيسية",
-        "$mainUrl/main0/" to "الرئيسية",
         "$mainUrl/recently/" to "مضاف حديثا",
         "$mainUrl/movies/" to "أفلام",
-        "$mainUrl/main0/" to "المسلسلات",
         "$mainUrl/category/افلام-انيميشن/" to "افلام انيميشن",
         "$mainUrl/category/cartoon-series/" to "مسلسلات كرتون",
         "$mainUrl/category/arabic-series-2/" to "مسلسلات عربي",
@@ -164,24 +161,35 @@ class Arabseed : MainAPI() {
             type = if (isTvSeries) "tv" else "movie"
         )
 
+        // Get SIMKL metadata if available
+        val simklMetadata = simklData?.let { SIMKLMetadata.getSIMKLMetadata(it) }
+
         return if (isTvSeries) {
             newTvSeriesLoadResponse(title, url, TvType.TvSeries, episodes.distinct().reversed()) {
                 this.posterUrl = poster
                 this.plot = synopsis
-                // Apply SIMKL metadata enhancement
-                SIMKLMetadata.applySIMKLToLoadResponse(simklData) {
-                    this.posterUrl = this@newTvSeriesLoadResponse.posterUrl ?: poster
-                    this.plot = this@newTvSeriesLoadResponse.plot ?: synopsis
+                // Apply SIMKL metadata if available
+                simklMetadata?.let { metadata ->
+                    this.rating = metadata.rating
+                    this.backgroundPosterUrl = metadata.backgroundPosterUrl
+                    // Use SIMKL overview if available and current plot is empty
+                    if (this.plot.isNullOrEmpty()) {
+                        this.plot = metadata.overview
+                    }
                 }
             }
         } else {
             newMovieLoadResponse(title, url, TvType.Movie, url) {
                 this.posterUrl = poster
                 this.plot = synopsis
-                // Apply SIMKL metadata enhancement
-                SIMKLMetadata.applySIMKLToLoadResponse(simklData) {
-                    this.posterUrl = this@newMovieLoadResponse.posterUrl ?: poster
-                    this.plot = this@newMovieLoadResponse.plot ?: synopsis
+                // Apply SIMKL metadata if available
+                simklMetadata?.let { metadata ->
+                    this.rating = metadata.rating
+                    this.backgroundPosterUrl = metadata.backgroundPosterUrl
+                    // Use SIMKL overview if available and current plot is empty
+                    if (this.plot.isNullOrEmpty()) {
+                        this.plot = metadata.overview
+                    }
                 }
             }
         }
@@ -303,4 +311,3 @@ class Arabseed : MainAPI() {
         return true
     }
 }
-
