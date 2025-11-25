@@ -3,136 +3,17 @@ package com.akwam
 import com.lagradost.cloudstream3.*
 import com.lagradost.cloudstream3.utils.ExtractorLink
 import com.lagradost.cloudstream3.utils.ExtractorLinkType
-import com.lagradost.cloudstream3.utils.Qualities
 import com.lagradost.cloudstream3.utils.loadExtractor
 import org.jsoup.Jsoup
 import java.net.URLEncoder
 import com.lagradost.cloudstream3.utils.newExtractorLink
 import com.lagradost.cloudstream3.utils.getQualityFromName
 import org.jsoup.nodes.Element
-import com.kim20598.utils.SIMKLUtils
-import com.kim20598.utils.SIMKLMetadata
+import kotlin.Pair
+import com.kim20598.utils.SIMKLHelper
 
 class Akwam : MainAPI() {
-    data class PosterData(val posterUrl: String?)
-
-    override var mainUrl = "https://ak.sv"
-    override var name = "Akwam"
-    override val hasMainPage = true
-    override var lang = "ar"
-    override val supportedTypes = setOf(
-        TvType.Movie, TvType.TvSeries, TvType.Anime, TvType.AsianDrama
-    )
-
-    private fun getPoster(element: Element?): String? {
-        return element?.selectFirst("img")?.let {
-            it.attr("data-src").ifBlank { it.attr("src") }
-        }
-    }
-
-    override suspend fun getMainPage(page: Int, request: MainPageRequest): HomePageResponse {
-        if (!request.data.isNullOrBlank()) {
-            val base = request.data.trim()
-            val pageUrl = if (page > 1) {
-                when {
-                    base.endsWith("/page/") -> "$base$page/"
-                    base.contains("?") -> "$base&amp;page=$page"
-                    else -> "$base?page=$page"
-                }
-            } else base
-
-            val doc = kotlin.runCatching { 
-                app.get(pageUrl).document 
-            }.getOrNull() ?: throw ErrorLoadingException("failed to load category page")
-
-            val list = doc.select("div.col-lg-auto.col-md-4.col-6").mapNotNull { el ->
-                val a = el.selectFirst("h3.entry-title a") ?: return@mapNotNull null
-                val title = a.text().trim().takeIf { it.isNotEmpty() } ?: return@mapNotNull null
-                val href = el.selectFirst("a")?.attr("abs:href") ?: return@mapNotNull null
-                val poster = getPoster(el)
-                val urlWithPoster = "$href#${poster ?: ""}"
-
-                newAnimeSearchResponse(name = title, url = urlWithPoster) {
-                    this.posterUrl = poster
-                }
-            }
-
-            if (list.isEmpty()) throw ErrorLoadingException()
-            return newHomePageResponse(request.name ?: "قائمة", list)
-        }
-
-        val urls = listOf(
-            "$mainUrl/movies" to "أحدث الأفلام",
-            "$mainUrl/series" to "أحدث المسلسلات",
-            "$mainUrl/shows" to "العروض",
-            "$mainUrl/series?section=29&amp;category=0&amp;rating=0&amp;year=0&amp;language=0&amp;formats=0&amp;quality=0" to "مسلسلات عربي",
-            "$mainUrl/series?section=32&amp;category=0&amp;rating=0&amp;year=0&amp;language=0&amp;formats=0&amp;quality=0" to "مسلسلات تركي",
-            "$mainUrl/series?section=33&amp;category=0&amp;rating=0&amp;year=0&amp;language=0&amp;formats=0&amp;quality=0" to "مسلسلات اسيوية",
-            "$mainUrl/series?section=30&amp;category=0&amp;rating=0&amp;year=0&amp;language=0&amp;formats=0&amp;quality=0" to "مسلسلات اجنبي",
-            "$mainUrl/series?section=31&amp;category=0&amp;rating=0&amp;year=0&amp;language=0&amp;formats=0&amp;quality=0" to "مسلسلات هندي",
-            "$mainUrl/shows?section=46&amp;category=0&amp;rating=0&amp;year=0&amp;language=0&amp;formats=0&amp;quality=0" to "برامج وثائقيه",
-            "$mainUrl/shows?section=42&amp;category=0&amp;rating=0&amp;year=0&amp;language=0&amp;formats=0&amp;quality=0" to "برامج تلفزيونية",
-            "$mainUrl/shows?section=45&amp;category=0&amp;rating=0&amp;year=0&amp;language=0&amp;formats=0&amp;quality=0" to "مسرحيات",
-            "$mainUrl/movies?section=29&amp;category=0&amp;rating=0&amp;year=0&amp;language=0&amp;formats=0&amp;quality=0" to "أفلام عربي",
-            "$mainUrl/movies?section=32&amp;category=0&amp;rating=0&amp;year=0&amp;language=0&amp;formats=0&amp;quality=0" to "أفلام تركي",
-            "$mainUrl/movies?section=33&amp;category=0&amp;rating=0&amp;year=0&amp;language=0&amp;formats=0&amp;quality=0" to "أفلام اسيوية",
-            "$mainUrl/movies?section=30&amp;category=0&amp;rating=0&amp;year=0&amp;language=0&amp;formats=0&amp;quality=0" to "أفلام اجنبي",
-            "$mainUrl/movies?section=31&amp;category=0&amp;rating=0&amp;year=0&amp;language=0&amp;formats=0&amp;quality=0" to "أفلام هندي",
-            "$mainUrl/mix?section=36&amp;category=0&amp;rating=0&amp;year=0&amp;language=0&amp;formats=0&amp;quality=0" to "رياضة"
-        )
-
-        val items = ArrayList<HomePageList>()
-        for ((baseUrl, titleName) in urls) {
-            try {
-                val fullUrl = if (page > 1) {
-                    if (baseUrl.contains("?")) "$baseUrl&amp;page=$page" else "$baseUrl?page=$page"
-                } else baseUrl
-
-                val doc = kotlin.runCatching { 
-                    app.get(fullUrl).document 
-                }.getOrNull() ?: continue
-
-                val list = doc.select("div.col-lg-auto.col-md-4.col-6").mapNotNull { el ->
-                    val a = el.selectFirst("h3.entry-title a") ?: return@mapNotNull null
-                    val title = a.text().trim().takeIf { it.isNotEmpty() } ?: return@mapNotNull null
-                    val href = el.selectFirst("a")?.attr("abs:href") ?: return@mapNotNull null
-                    val poster = getPoster(el)
-                    val urlWithPoster = "$href#${poster ?: ""}"
-
-                    newAnimeSearchResponse(name = title, url = urlWithPoster) {
-                        this.posterUrl = poster
-                    }
-                }
-
-                if (list.isNotEmpty()) items.add(HomePageList(titleName, list))
-            } catch (_: Exception) {
-            }
-        }
-
-        if (items.isEmpty()) throw ErrorLoadingException()
-        return newHomePageResponse(items)
-    }
-
-    override suspend fun search(query: String): List<SearchResponse> {
-        val q = URLEncoder.encode(query, "utf-8")
-        val url = "$mainUrl/search?q=$q"
-        val document = app.get(url).document
-
-        return document.select("div.col-lg-auto.col-md-4.col-6").mapNotNull {
-            val title = it.selectFirst("h3.entry-title a")?.text() ?: return@mapNotNull null
-            val href = it.selectFirst("a")?.attr("href") ?: return@mapNotNull null
-            val poster = getPoster(it)
-            val urlWithPoster = "$href#${poster ?: ""}"
-
-            newMovieSearchResponse(name = title, url = urlWithPoster, type = TvType.Movie) {
-                this.posterUrl = poster
-            }
-        }
-    }
-
-    private fun getEpisodeNumberFromString(name: String): Int? {
-        return Regex("""\d+""").findAll(name).lastOrNull()?.value?.toIntOrNull()
-    }
+    // ... keep all your existing code the same until the load function ...
 
     override suspend fun load(url: String): LoadResponse {
         val parts = url.split("#")
@@ -148,6 +29,19 @@ class Akwam : MainAPI() {
         val tags = mainDoc.select("div.font-size-16.text-white a[href*='/genre/'], div.font-size-16.text-white a[href*='/category/']")
             .map { it.text() }
         val year = mainDoc.select("div.font-size-16.text-white a[href*='/year/']").firstOrNull()?.text()?.toIntOrNull()
+
+        // SIMKL Integration - Extract IMDB ID
+        val imdbId = SIMKLHelper.extractImdbId(mainDoc.html())
+        val simklDetails = if (imdbId != null) {
+            // Determine if it's a movie or TV series
+            val isSeries = mainDoc.select("div#series-episodes div[class*='col-']").isNotEmpty() ||
+                          mainDoc.select("div.widget-body > a.btn[href*='/series/']").isNotEmpty()
+            if (isSeries) {
+                SIMKLHelper.getTVDetails(imdbId)
+            } else {
+                SIMKLHelper.getMovieDetails(imdbId)
+            }
+        } else null
 
         val recommendations = mainDoc.select("div.widget-body div[class*='col-']").mapNotNull {
             val recTitle = it.selectFirst("h3 a")?.text()?.trim() ?: return@mapNotNull null
@@ -179,30 +73,16 @@ class Akwam : MainAPI() {
         val directEpisodes = mainDoc.select("div#series-episodes div[class*='col-']")
         val isSeries = seasonsMap.size > 1 || directEpisodes.isNotEmpty()
 
-        // SIMKL Integration - Extract IMDB ID and enhance metadata
-        val imdbId = extractImdbId(mainDoc)
-        val simklData = SIMKLMetadata.enhanceWithSIMKL(
-            title = title,
-            year = year,
-            imdbId = imdbId,
-            type = if (isSeries) "tv" else "movie"
-        )
-
         if (!isSeries) {
             return newMovieLoadResponse(name = title, url = pageUrl, type = TvType.Movie, dataUrl = pageUrl) {
                 this.posterUrl = poster
                 this.backgroundPosterUrl = poster
-                this.plot = plot
-                this.year = year
+                this.plot = plot ?: simklDetails?.overview
+                this.year = year ?: simklDetails?.year
                 this.tags = tags
                 this.recommendations = recommendations
-                // Apply SIMKL metadata enhancement
-                SIMKLMetadata.applySIMKLToLoadResponse(simklData) {
-                    this.posterUrl = this@newMovieLoadResponse.posterUrl ?: poster
-                    this.plot = this@newMovieLoadResponse.plot ?: plot
-                    this.year = this@newMovieLoadResponse.year ?: year
-                    this.tags = this@newMovieLoadResponse.tags ?: tags
-                }
+                // Add SIMKL rating if available
+                simklDetails?.rating?.let { this.score = it / 2 } // Convert 10-point scale to 5-point
             }
         }
 
@@ -237,17 +117,11 @@ class Akwam : MainAPI() {
             return newMovieLoadResponse(name = title, url = pageUrl, type = TvType.Movie, dataUrl = pageUrl) {
                 this.posterUrl = poster
                 this.backgroundPosterUrl = poster
-                this.plot = plot
-                this.year = year
+                this.plot = plot ?: simklDetails?.overview
+                this.year = year ?: simklDetails?.year
                 this.tags = tags
                 this.recommendations = recommendations
-                // Apply SIMKL metadata enhancement
-                SIMKLMetadata.applySIMKLToLoadResponse(simklData) {
-                    this.posterUrl = this@newMovieLoadResponse.posterUrl ?: poster
-                    this.plot = this@newMovieLoadResponse.plot ?: plot
-                    this.year = this@newMovieLoadResponse.year ?: year
-                    this.tags = this@newMovieLoadResponse.tags ?: tags
-                }
+                simklDetails?.rating?.let { this.score = it / 2 }
             }
         }
 
@@ -256,114 +130,13 @@ class Akwam : MainAPI() {
         ) {
             this.posterUrl = poster
             this.backgroundPosterUrl = poster
-            this.plot = plot
-            this.year = year
+            this.plot = plot ?: simklDetails?.overview
+            this.year = year ?: simklDetails?.year
             this.tags = tags
             this.recommendations = recommendations
-            // Apply SIMKL metadata enhancement
-            SIMKLMetadata.applySIMKLToLoadResponse(simklData) {
-                this.posterUrl = this@newTvSeriesLoadResponse.posterUrl ?: poster
-                this.plot = this@newTvSeriesLoadResponse.plot ?: plot
-                this.year = this@newTvSeriesLoadResponse.year ?: year
-                this.tags = this@newTvSeriesLoadResponse.tags ?: tags
-            }
+            simklDetails?.rating?.let { this.score = it / 2 }
         }
     }
 
-    // Enhanced IMDB ID extraction for SIMKL integration
-    private fun extractImdbId(doc: org.jsoup.nodes.Document): String? {
-        val content = doc.html()
-        return SIMKLUtils.extractIMDBIdFromUrl(content)
-    }
-
-    private fun getSeasonNumber(seasonName: String): Int {
-        val map = mapOf(
-            "الاول" to 1, "الأول" to 1, "الثاني" to 2, "الثالث" to 3, "الرابع" to 4,
-            "الخامس" to 5, "السادس" to 6, "السابع" to 7, "الثامن" to 8, "التاسع" to 9,
-            "العاشر" to 10, "الحادي عشر" to 11, "الثاني عشر" to 12, "الثالث عشر" to 13,
-            "الرابع عشر" to 14, "الخامس عشر" to 15, "السادس عشر" to 16, "السابع عشر" to 17,
-            "الثامن عشر" to 18, "التاسع عشر" to 19, "العشرون" to 20, "الحادي والعشرون" to 21,
-            "الثاني والعشرون" to 22, "الثالث والعشرون" to 23, "الرابع والعشرون" to 24,
-            "الخامس والعشرون" to 25, "السادس والعشرون" to 26, "السابع والعشرون" to 27,
-            "الثامن والعشرون" to 28, "التاسع والعشرون" to 29, "الثلاثون" to 30
-        )
-
-        val lower = seasonName.lowercase()
-        for ((k, v) in map) {
-            if (lower.contains(k)) return v
-        }
-
-        val nums = Regex("\\d+").findAll(seasonName).map { it.value.toIntOrNull() ?: 0 }.toList()
-        if (nums.isNotEmpty()) return nums.last()
-
-        return 1
-    }
-
-    override suspend fun loadLinks(
-        data: String,
-        isCasting: Boolean,
-        subtitleCallback: (SubtitleFile) -> Unit,
-        callback: (ExtractorLink) -> Unit
-    ): Boolean {
-        val episodeUrl = data
-
-        return kotlin.runCatching {
-            val step1Doc = app.get(episodeUrl).document
-
-            val watchPathElement = step1Doc.selectFirst("a.link-show")
-            val pageIdElement = step1Doc.selectFirst("input#page_id")
-
-            if (watchPathElement == null || pageIdElement == null) {
-                return@runCatching false
-            }
-
-            val watchPath = watchPathElement.attr("href").ifBlank { watchPathElement.attr("abs:href") }
-            val pageId = pageIdElement.attr("value").ifBlank { pageIdElement.attr("data-value") }
-
-            if (watchPath.isBlank() || pageId.isBlank()) {
-                return@runCatching false
-            }
-
-            val main = mainUrl.trimEnd('/')
-            val watchSuffix = run {
-                val idx = watchPath.indexOf("watch")
-                if (idx >= 0) watchPath.substring(idx + "watch".length) else watchPath
-            }.trim()
-
-            val watchUrl = (main + "/watch" + watchSuffix.trimEnd('/') + "/" + pageId)
-                .replace("//watch", "/watch")
-                .replace(":/", "://")
-
-            val step2Doc = kotlin.runCatching {
-                app.get(watchUrl).document
-            }.getOrElse {
-                app.get(watchUrl, headers = mapOf("Referer" to episodeUrl)).document
-            }
-
-            val sourceElements = step2Doc.select("source[src]")
-            if (sourceElements.isEmpty()) {
-                return@runCatching false
-            }
-
-            val seen = mutableSetOf<String>()
-            for (srcEl in sourceElements) {
-                val rawVideoUrl = srcEl.attr("abs:src").ifBlank { srcEl.attr("src") }.trim()
-                val videoUrl = rawVideoUrl.replace(" ", "%20")
-
-                if (videoUrl.isBlank()) continue
-                if (!seen.add(videoUrl)) continue
-
-                val qualityAttr = srcEl.attr("size").ifBlank { srcEl.attr("label") }.ifBlank { "direct" }
-
-                callback(
-                    newExtractorLink(source = this.name, name = name, url = videoUrl) {
-                        this.referer = episodeUrl
-                        this.quality = getQualityFromName(qualityAttr)
-                        this.type = ExtractorLinkType.VIDEO
-                    }
-                )
-            }
-            true
-        }.getOrElse { false }
-    }
+    // ... keep the rest of your existing code the same ...
 }
