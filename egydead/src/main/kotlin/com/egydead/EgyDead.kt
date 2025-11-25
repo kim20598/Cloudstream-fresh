@@ -6,6 +6,8 @@ import com.lagradost.cloudstream3.utils.ExtractorLink
 import com.lagradost.cloudstream3.utils.loadExtractor
 import org.jsoup.nodes.Element
 import java.net.URLEncoder
+import com.kim20598.utils.SIMKLUtils
+import com.kim20598.utils.SIMKLMetadata
 
 class EgyDead : MainAPI() {
     override var lang = "ar"
@@ -51,33 +53,83 @@ class EgyDead : MainAPI() {
         "$mainUrl/category/%d8%a7%d9%81%d9%84%d8%a7%d9%85-%d9%87%d9%86%d8%af%d9%8a%d8%a9/?page=" to "Indian Movies | أفلام هندية",
         "$mainUrl/category/%d8%a7%d9%81%d9%84%d8%a7%d9%85-%d8%b9%d8%b1%d8%a8%d9%8a/?page=" to "Arabic Movies | أفلام عربي",
         "$mainUrl/category/%d8%a7%d9%81%d9%84%d8%a7%d9%85-%d8%a7%d9%86%d9%85%d9%8a/?page=" to "Anime Movies | أفلام أنمي",
+
+        "$mainUrl/type/thriller/?page=" to "Thriller | إثارة",
+    "$mainUrl/type/action/?page=" to "Action | أكشن",
+    "$mainUrl/type/animation/?page=" to "Animation | أنيميشن",
+    "$mainUrl/type/ecchi/?page=" to "Ecchi | إيتشي",
+    "$mainUrl/type/idols/?page=" to "Idols | آيدولز",
+    "$mainUrl/type/isekai/?page=" to "Isekai | إيسيكاى",
+    "$mainUrl/type/talk-shows/?page=" to "Talk Shows | برامج حوارية",
+    "$mainUrl/type/detective/?page=" to "Detective | بوليسي",
+    "$mainUrl/type/history/?page=" to "History | تاريخي",
+    "$mainUrl/type/reality-shows/?page=" to "Reality Shows | تلفزيون الواقع",
+    "$mainUrl/type/crime/?page=" to "Crime | جريمة",
+    "$mainUrl/type/josei/?page=" to "Josei | جوسي",
+    "$mainUrl/type/war/?page=" to "War | حربي",
+    "$mainUrl/type/harem/?page=" to "Harem | حريم",
+    "$mainUrl/type/supernatural/?page=" to "Supernatural | خارق للطبيعة",
+    "$mainUrl/type/sci-fi/?page=" to "Sci-Fi | خيال علمي",
+    "$mainUrl/type/drama/?page=" to "Drama | دراما",
+    "$mainUrl/type/horror/?page=" to "Horror | رعب",
+    "$mainUrl/type/romance/?page=" to "Romance | رومانسي",
+    "$mainUrl/type/sports/?page=" to "Sports | رياضي",
+    "$mainUrl/type/parody/?page=" to "Parody | ساخر",
+    "$mainUrl/type/samurai/?page=" to "Samurai | ساموراي",
+    "$mainUrl/type/seinen/?page=" to "Seinen | سينن",
+    "$mainUrl/type/biography/?page=" to "Biography | سيرة ذاتية",
+    "$mainUrl/type/slice-of-life/?page=" to "Slice of Life | شريحة من الحياة",
+    "$mainUrl/type/shoujo/?page=" to "Shoujo | شوجو",
+    "$mainUrl/type/shounen/?page=" to "Shounen | شونين",
+    "$mainUrl/type/cooking/?page=" to "Cooking | طبخ",
+    "$mainUrl/type/medical/?page=" to "Medical | طبي",
+    "$mainUrl/type/family/?page=" to "Family | عائلي",
+    "$mainUrl/type/military/?page=" to "Military | عسكري",
+    "$mainUrl/type/mystery/?page=" to "Mystery | غموض",
+    "$mainUrl/type/fantasy/?page=" to "Fantasy | فانتازيا",
+    "$mainUrl/type/space/?page=" to "Space | فضاء",
+    "$mainUrl/type/martial-arts/?page=" to "Martial Arts | فنون قتالية",
+    "$mainUrl/type/film-noir/?page=" to "Film Noir | فيلم نوار",
+    "$mainUrl/type/short/?page=" to "Short | قصير",
+    "$mainUrl/type/super-power/?page=" to "Super Power | قوة خارقة",
+    "$mainUrl/type/classic-movies/?page=" to "Classic | كلاسيك",
+    "$mainUrl/type/comedy/?page=" to "Comedy | كوميديا",
+    "$mainUrl/type/game/?page=" to "Game | لعبة",
+    "$mainUrl/type/school/?page=" to "School | مدرسي",
+    "$mainUrl/type/game-show/?page=" to "Game Show | مسابقات",
+    "$mainUrl/type/vampire/?page=" to "Vampire | مصاصي دماء",
+    "$mainUrl/type/adventure/?page=" to "Adventure | مغامرة",
+    "$mainUrl/type/music/?page=" to "Music | موسيقي",
+    "$mainUrl/type/mecha/?page=" to "Mecha | ميكا",
+    "$mainUrl/type/documentary/?page=" to "Documentary | وثائقي",
+    "$mainUrl/type/western/?page=" to "Western | ويسترن",
         
         // Series Categories (مسلسلات)
-        "$mainUrl/series-category/%d9%85%d8%b3%d9%84%d8%b3%d9%84%d8%a7%d8%aa-%d8%a7%d8%ac%d9%86%d8%a8%d9%8a-1/?page=" to "Foreign Series | مسلسلات أجنبي",
-        "$mainUrl/series-category/%d9%85%d8%b3%d9%84%d8%b3%d9%84%d8%a7%d8%aa-%d9%83%d8%b1%d8%aa%d9%88%d9%86/?page=" to "Cartoon Series | مسلسلات كرتون",
-        "$mainUrl/series-category/%d9%85%d8%b3%d9%84%d8%b3%d9%84%d8%a7%d8%aa-%d8%a7%d8%b3%d9%8a%d9%88%d9%8a%d8%a9/?page=" to "Asian Series | مسلسلات آسيوية",
-        "$mainUrl/series-category/%d9%85%d8%b3%d9%84%d8%b3%d9%84%d8%a7%d8%aa-%d8%aa%d8%b1%d9%83%d9%8a%d8%a9-%d8%a7/?page=" to "Turkish Series | مسلسلات تركية",
-        "$mainUrl/series-category/%d9%85%d8%b3%d9%84%d8%b3%d9%84%d8%a7%d8%aa-%d9%84%d8%a7%d8%aa%d9%8a%d9%86%d9%8a%d8%a9/?page=" to "Latin Series | مسلسلات لاتينية",
-        "$mainUrl/series-category/%d9%85%d8%b3%d9%84%d8%b3%d9%84%d8%a7%d8%aa-%d9%88%d8%ab%d8%a7%d8%a6%d9%82%d9%8a%d8%a9/?page=" to "Documentary Series | مسلسلات وثائقية",
-        "$mainUrl/series-category/%d9%85%d8%b3%d9%84%d8%b3%d9%84%d8%a7%d8%aa-%d8%b9%d8%b1%d8%a8%d9%8a/?page=" to "Arabic Series | مسلسلات عربي",
-        "$mainUrl/series-category/%d9%85%d8%b3%d9%84%d8%b3%d9%84%d8%a7%d8%aa-%d8%a7%d9%81%d8%b1%d9%8a%d9%82%d9%8a%d8%a9/?page=" to "African Series | مسلسلات أفريقية",
+        "$mainUrl/series-category/english-series/?page=" to "Foreign Series | مسلسلات أجنبي",
+        "$mainUrl/series-category/cartoon-series/?page=" to "Cartoon Series | مسلسلات كرتون",
+        "$mainUrl/series-category/asian-series/?page=" to "Asian Series | مسلسلات آسيوية",
+        "$mainUrl/series-category/turkish-series/?page=" to "Turkish Series | مسلسلات تركية",
+        "$mainUrl/series-category/latino-series/?page=" to "Latin Series | مسلسلات لاتينية",
+        "$mainUrl/series-category/documentary-series/?page=" to "Documentary Series | مسلسلات وثائقية",
+        "$mainUrl/series-category/arabic-series/?page=" to "Arabic Series | مسلسلات عربي",
+        "$mainUrl/series-category/african-series/?page=" to "African Series | مسلسلات أفريقية",
 
         // Anime Categories (انمي)
-        "$mainUrl/series-category/%d9%85%d8%b3%d9%84%d8%b3%d9%84%d8%a7%d8%aa-%d8%a7%d9%86%d9%85%d9%8a/?page=" to "Anime Series | مسلسلات أنمي",
-        "$mainUrl/series-category/%d9%85%d8%b3%d9%84%d8%b3%d9%84%d8%a7%d8%aa-%d8%a7%d9%86%d9%85%d9%8a-%d9%85%d8%af%d8%a8%d9%84%d8%ac%d8%a9/?page=" to "Dubbed Anime Series | مسلسلات أنمي مدبلجة",
-        "$mainUrl/series-category/%d8%a7%d9%81%d9%84%d8%a7%d9%85-%d8%a7%d9%86%d9%85%d9%8a/?page=" to "Anime Movies | أفلام أنمي",
-        "$mainUrl/series-category/%d8%a7%d9%86%d9%85%d9%8a%d8%a7%d8%aa-%d8%b5%d9%8a%d9%86%d9%8a%d8%a9/?page=" to "Chinese Anime | أنميات صينية",
-        "$mainUrl/series-category/%d8%a7%d9%86%d9%85%d9%8a%d8%a7%d8%aa-%d9%83%d9%88%d8%b1%d9%8a%d8%a9/?page=" to "Korean Anime | أنميات كورية",
+        "$mainUrl/series-category/anime-series/?page=" to "Anime Series | مسلسلات أنمي",
+        "$mainUrl/series-category/anime-series-dubbed/?page=" to "Dubbed Anime Series | مسلسلات أنمي مدبلجة",
+        "$mainUrl/series-category/anime-movies/?page=" to "Anime Movies | أفلام أنمي",
+        "$mainUrl/series-category/chinese-anime/?page=" to "Chinese Anime | أنميات صينية",
+        "$mainUrl/series-category/korean-anime/?page=" to "Korean Anime | أنميات كورية",
         
         // Dubbed Series (المدبلج)
-        "$mainUrl/series-category/%d9%85%d8%b3%d9%84%d8%b3%d9%84%d8%a7%d8%aa-%d8%a7%d8%ac%d9%86%d8%a8%d9%8a-%d9%85%d8%af%d8%a8%d9%84%d8%ac%d8%a9/?page=" to "Dubbed Foreign Series | مسلسلات أجنبي مدبلجة",
-        "$mainUrl/series-category/%d9%85%d8%b3%d9%84%d8%b3%d9%84%d8%a7%d8%aa-%d8%aa%d8%b1%d9%83%d9%8a%d8%a9-%d9%85%d8%af%d8%a8%d9%84%d8%ac%d8%a9/?page=" to "Dubbed Turkish Series | مسلسلات تركية مدبلجة",
-        "$mainUrl/series-category/%d9%85%d8%b3%d9%84%d8%b3%d9%84%d8%a7%d8%aa-%d9%83%d8%b1%d8%aa%d9%88%d9%86-%d9%85%d8%af%d8%a8%d9%84%d8%ac%d8%a9/?page=" to "Dubbed Cartoon Series | مسلسلات كرتون مدبلجة",
-        "$mainUrl/series-category/%d9%85%d8%b3%d9%84%d8%b3%d9%84%d8%a7%d8%aa-%d9%84%d8%a7%d8%aa%d9%8a%d9%86%d9%8a%d8%a9-%d9%85%d8%af%d8%a8%d9%84%d8%ac%d8%a9/?page=" to "Dubbed Latin Series | مسلسلات لاتينية مدبلجة",
+        "$mainUrl/series-category/english-series-dubbed/?page=" to "Dubbed Foreign Series | مسلسلات أجنبي مدبلجة",
+        "$mainUrl/series-category/turkish-series-dubbed/?page=" to "Dubbed Turkish Series | مسلسلات تركية مدبلجة",
+        "$mainUrl/series-category/cartoon-series-dubbed/?page=" to "Dubbed Cartoon Series | مسلسلات كرتون مدبلجة",
+        "$mainUrl/series-category/latino-series-dubbed/?page=" to "Dubbed Latin Series | مسلسلات لاتينية مدبلجة",
 
         // Miscellaneous Content
         "$mainUrl/category/%d8%b1%d9%8a%d8%a7%d8%b6%d8%a9/?page=" to "Sports | رياضة",
-        "$mainUrl/series-category/%d8%a8%d8%b1%d8%a7%d9%85%d8%ac-%d8%aa%d9%84%d9%81%d8%b2%d9%8a%d9%88%d9%86%d9%8a%d8%a9-1/?page=" to "TV Programs | برامج تلفزيونية",
+        "$mainUrl/series-category/tv-shows/?page=" to "TV Programs | برامج تلفزيونية",
         "$mainUrl/category/%d8%b9%d8%b1%d9%88%d8%b6-%d9%88%d8%ad%d9%81%d9%84%d8%a7%d8%aa/?page=" to "Stand-up Shows & Concerts | عروض وحفلات",
 
         // Tags (Seasonal & Special)
@@ -128,6 +180,15 @@ class EgyDead : MainAPI() {
         }
         val youtubeTrailer = doc.select("div.popupContent > iframe").attr("src")
         
+        // SIMKL Integration - Extract IMDB ID and enhance metadata
+        val imdbId = extractImdbId(doc)
+        val simklData = SIMKLMetadata.enhanceWithSIMKL(
+            title = title,
+            year = year,
+            imdbId = imdbId,
+            type = if (isMovie) "movie" else "show"
+        )
+        
         return if (isMovie) {
             newMovieLoadResponse(title, url, TvType.Movie, url) {
                 this.posterUrl = posterUrl
@@ -136,6 +197,13 @@ class EgyDead : MainAPI() {
                 this.tags = tags
                 this.year = year
                 addTrailer(youtubeTrailer)
+                // Apply SIMKL metadata enhancement
+                SIMKLMetadata.applySIMKLToLoadResponse(simklData) {
+                    this.posterUrl = this@newMovieLoadResponse.posterUrl ?: posterUrl
+                    this.plot = this@newMovieLoadResponse.plot ?: synopsis
+                    this.year = this@newMovieLoadResponse.year ?: year
+                    this.tags = this@newMovieLoadResponse.tags ?: tags
+                }
             }
         } else {
             val seasonList = doc.select("div.seasons-list ul > li > a").reversed()
@@ -169,6 +237,13 @@ class EgyDead : MainAPI() {
                 this.recommendations = recommendations
                 this.year = year
                 addTrailer(youtubeTrailer)
+                // Apply SIMKL metadata enhancement
+                SIMKLMetadata.applySIMKLToLoadResponse(simklData) {
+                    this.posterUrl = this@newTvSeriesLoadResponse.posterUrl ?: posterUrl
+                    this.plot = this@newTvSeriesLoadResponse.plot ?: synopsis
+                    this.year = this@newTvSeriesLoadResponse.year ?: year
+                    this.tags = this@newTvSeriesLoadResponse.tags ?: tags
+                }
             }
         }
     }
@@ -177,9 +252,20 @@ class EgyDead : MainAPI() {
         var foundLinks = false
         
         try {
-            val doc = app.post(data, data = mapOf("View" to "1")).document
+            // Get subtitles first
+            val doc = app.get(data).document
+            val imdbId = extractImdbId(doc)
+            if (!imdbId.isNullOrBlank()) {
+                SubUtils.getAllSubtitles(
+                    id = imdbId,
+                    subtitleCallback = subtitleCallback
+                )
+            }
             
-            doc.select(".donwload-servers-list > li, .download-servers > li").forEach { element ->
+            val postDoc = app.post(data, data = mapOf("View" to "1")).document
+            
+            // FIXED: Use postDoc instead of doc for video links
+            postDoc.select(".donwload-servers-list > li, .download-servers > li").forEach { element ->
                 val url = element.select("a").attr("href")
                 if (url.isNotBlank()) {
                     foundLinks = true
@@ -187,7 +273,8 @@ class EgyDead : MainAPI() {
                 }
             }
             
-            doc.select("ul.serversList > li, [data-link]").forEach { li ->
+            // FIXED: Use postDoc instead of doc for video links
+            postDoc.select("ul.serversList > li, [data-link]").forEach { li ->
                 val iframeUrl = li.attr("data-link").ifBlank { li.select("a").attr("href") }
                 if (iframeUrl.isNotBlank() && iframeUrl.contains("http")) {
                     foundLinks = true
@@ -200,5 +287,11 @@ class EgyDead : MainAPI() {
         }
         
         return foundLinks
+    }
+
+    // Enhanced IMDB ID extraction for SIMKL integration
+    private fun extractImdbId(doc: org.jsoup.nodes.Document): String? {
+        val content = doc.html()
+        return SIMKLUtils.extractIMDBIdFromUrl(content)
     }
 }
